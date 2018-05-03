@@ -1,9 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>#
-#include <math.h>
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 struct move {
 	int startX;
@@ -32,13 +32,13 @@ std::vector<move> possibleMoves;
 //odd is black, white is even
 int startingBoard[8][8] = {
 	{ 3,5,7,11,9,7,5,3 },
-	{ 1,1,1,1,1,1,1,1 },
-	{ 0,0,0,0,0,0,0,0 },
-	{ 0,0,0,0,0,0,0,0},
-	{ 0,0,0,0,0,0,0,0 },
-	{ 0,0,0,0,0,0,0,0 },
-	{ 2,2,2,2,2,2,2,2 },
-	{ 4,6,8,10,12,8,6,4 },
+{ 1,1,1,1,1,1,1,1 },
+{ 0,0,0,0,0,0,0,0 },
+{ 0,0,0,0,0,0,0,0 },
+{ 0,0,0,0,0,0,0,0 },
+{ 0,0,0,0,0,0,0,0 },
+{ 2,2,2,2,2,2,2,2 },
+{ 4,6,8,10,12,8,6,4 },
 };
 
 
@@ -80,9 +80,9 @@ void makeMove() {
 	startingBoard[possibleMoves[maxValueIndex].endY][possibleMoves[maxValueIndex].endX] = startingBoard[possibleMoves[maxValueIndex].startY][possibleMoves[maxValueIndex].startX];
 	startingBoard[possibleMoves[maxValueIndex].startY][possibleMoves[maxValueIndex].startX] = 0;
 	printBoard(startingBoard);
-	std::cout << "Best move:\n(" << possibleMoves[maxValueIndex].startX << "," 
-		<< possibleMoves[maxValueIndex].startY << ") -> (" 
-		<< possibleMoves[maxValueIndex].endX << "," 
+	std::cout << "Best move:\n(" << possibleMoves[maxValueIndex].startX << ","
+		<< possibleMoves[maxValueIndex].startY << ") -> ("
+		<< possibleMoves[maxValueIndex].endX << ","
 		<< possibleMoves[maxValueIndex].endY << ")\nvalue: " << possibleMoves[maxValueIndex].value << std::endl;
 }
 
@@ -139,13 +139,13 @@ double sigmoidFunction(double inp) {
 }
 
 double nextSetOfMoves(const int board[8][8], const int depth) {
-	
+
 	branchCounter++;
 	if (branchCounter % 500000 == 0) {
 		std::cout << "Depth: " << depth << std::endl;
 		std::cout << "Branches: " << branchCounter << std::endl;
 	}
-	
+
 	//checking if at max depth
 	if (depth > maxDepth) {
 		return approximateBoard(board);
@@ -160,15 +160,11 @@ double nextSetOfMoves(const int board[8][8], const int depth) {
 		}
 	}
 	if (!blackKingsAlive) {
-		if (playingBlack) {
-			return -1;
-		}
+		if (playingBlack) return -1;
 		return 1;
 	}
 	else if (!whiteKingAlive) {
-		if (playingBlack) {
-			return 1;
-		}
+		if (playingBlack) return 1;
 		return -1;
 	}
 	//boardHolder to avoid reference issues
@@ -184,8 +180,8 @@ double nextSetOfMoves(const int board[8][8], const int depth) {
 				switch (boardHolder[y][x]) {
 				case 1://black pawn
 				case 2://white pawn
-					//moves
-					//+x
+					   //moves
+					   //+x
 					if (x < 7 && boardHolder[y][x + 1] == 0) {
 						std::memcpy(newBoard, boardHolder, 8 * 8 * sizeof int());
 						newBoard[y][x + 1] = boardHolder[y][x];
@@ -258,7 +254,7 @@ double nextSetOfMoves(const int board[8][8], const int depth) {
 					break;
 				case 3://black rook
 				case 4://white rook
-					//moving and taking in +x
+					   //moving and taking in +x
 					for (int i = x + 1; i < 8; i++) {
 						if (boardHolder[y][i] != 0) {//if boardHolder[y][i] is not empty
 							if (boardHolder[y][x] % 2 == boardHolder[y][i] % 2) {//if boardHolder[y][i] is same colour

@@ -1,6 +1,0 @@
-﻿  Source.cpp
-c:\users\jonat\source\repos\chessai\chessai\source.cpp(2): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\jonat\source\repos\chessai\chessai\source.cpp(65): warning C4018: '<': signed/unsigned mismatch
-c:\users\jonat\source\repos\chessai\chessai\source.cpp(73): warning C4018: '<': signed/unsigned mismatch
-  chessAI.vcxproj -> C:\Users\jonat\source\repos\chessAI\Debug\chessAI.exe
-  chessAI.vcxproj -> C:\Users\jonat\source\repos\chessAI\Debug\chessAI.pdb (Partial PDB)
