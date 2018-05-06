@@ -11,12 +11,14 @@ struct move {
 	int endX;
 	int endY;
 	double value;
-	move(int startX, int startY, int endX, int endY, double value) {
+	int peice;
+	move(int startX, int startY, int endX, int endY, double value, int peice) {
 		this->startX = startX;
 		this->startY = startY;
 		this->endX = endX;
 		this->endY = endY;
 		this->value = value;
+		this->peice = peice;
 	}
 };
 
@@ -32,13 +34,13 @@ std::vector<move> possibleMoves;
 //odd is black, white is even
 int startingBoard[8][8] = {
 	{ 3,5,7,11,9,7,5,3 },
-{ 1,1,1,1,1,1,1,1 },
-{ 0,0,0,0,0,0,0,0 },
-{ 0,0,0,0,0,0,0,0 },
-{ 0,0,0,0,0,0,0,0 },
-{ 0,0,0,0,0,0,0,0 },
-{ 2,2,2,2,2,2,2,2 },
-{ 4,6,8,10,12,8,6,4 },
+	{ 1,1,1,1,1,1,1,1 },
+	{ 0,0,0,0,0,0,0,0 },
+	{ 0,0,0,0,0,0,0,0 },
+	{ 0,0,0,0,0,0,0,0 },
+	{ 0,0,0,0,0,0,0,0 },
+	{ 2,2,2,2,2,2,2,2 },
+	{ 4,6,8,10,12,8,6,4 },
 };
 
 
@@ -46,12 +48,11 @@ bool playingBlack = false;
 
 int peiceValues[5] = { 1,5,3,3,9 };
 
-int maxDepth = 10;
+int maxDepth = 4;
 int branchCounter = 0;
 double modifier = 0.01;
 
 int main() {
-
 	nextSetOfMoves(startingBoard);
 	makeMove();
 
@@ -66,7 +67,7 @@ void makeMove() {
 		std::cout << "(" << possibleMoves[i].startX << ","
 			<< possibleMoves[i].startY << ") -> ("
 			<< possibleMoves[i].endX << ","
-			<< possibleMoves[i].endY << ")\nvalue: " << possibleMoves[i].value << std::endl;
+			<< possibleMoves[i].endY << ")\nvalue: " << possibleMoves[i].value << ", peice: " << possibleMoves[i].peice << std::endl;
 	}
 
 
@@ -99,7 +100,7 @@ void printBoard(const int board[8][8]) {
 }
 
 move findMove(const int board[8][8], double routeValue) {
-	int startX, startY, endX, endY;
+	int startX, startY, endX, endY, peice;
 	for (int y = 0; y < 8; y++) {
 		for (int x = 0; x < 8; x++) {
 			if (startingBoard[y][x] != board[y][x]) {
@@ -110,11 +111,12 @@ move findMove(const int board[8][8], double routeValue) {
 				else {
 					endX = x;
 					endY = y;
+					peice = board[y][x];
 				}
 			}
 		}
 	}
-	return move(startX, startY, endX, endY, routeValue);
+	return move(startX, startY, endX, endY, routeValue, peice);
 }
 
 double approximateBoard(const int board[8][8]) {
@@ -141,7 +143,7 @@ double sigmoidFunction(double inp) {
 double nextSetOfMoves(const int board[8][8], const int depth) {
 
 	branchCounter++;
-	if (branchCounter % 500000 == 0) {
+	if (branchCounter % 50000 == 0) {
 		std::cout << "Depth: " << depth << std::endl;
 		std::cout << "Branches: " << branchCounter << std::endl;
 	}
@@ -179,73 +181,68 @@ double nextSetOfMoves(const int board[8][8], const int depth) {
 			if (boardHolder[y][x] != 0 && ((boardHolder[y][x] % 2 != depth % 2 && playingBlack) || ((boardHolder[y][x] % 2 == depth % 2 && !playingBlack)))) {
 				switch (boardHolder[y][x]) {
 				case 1://black pawn
-				case 2://white pawn
-					   //moves
-					   //+x
-					if (x < 7 && boardHolder[y][x + 1] == 0) {
-						std::memcpy(newBoard, boardHolder, 8 * 8 * sizeof int());
-						newBoard[y][x + 1] = boardHolder[y][x];
-						newBoard[y][x] = 0;
-						routeValue += nextSetOfMoves(newBoard, depth + 1);
-						branches++;
-					}
-					//+y
-					if (y < 7 && boardHolder[y + 1][x] == 0) {
-						std::memcpy(newBoard, boardHolder, 8 * 8 * sizeof int());
-						newBoard[y + 1][x] = boardHolder[y][x];
-						newBoard[y][x] = 0;
-						routeValue += nextSetOfMoves(newBoard, depth + 1);
-						branches++;
-					}
-					//-x
-					if (x > 0 && boardHolder[y][x - 1] == 0) {
-						std::memcpy(newBoard, boardHolder, 8 * 8 * sizeof int());
-						newBoard[y][x - 1] = boardHolder[y][x];
-						newBoard[y][x] = 0;
-						routeValue += nextSetOfMoves(newBoard, depth + 1);
-						branches++;
-					}
-					if (y > 0 && boardHolder[y - 1][x] == 0) {
-						std::memcpy(newBoard, boardHolder, 8 * 8 * sizeof int());
-						newBoard[y - 1][x] = boardHolder[y][x];
-						newBoard[y][x] = 0;
-						routeValue += nextSetOfMoves(newBoard, depth + 1);
-						branches++;
-					}
-					//takes
-					//black peice taking
-					if (y < 7 && boardHolder[y][x] == 1) {
-						//taking in +x
-						if (x < 7 && boardHolder[y][x] % 2 != boardHolder[y + 1][x + 1] % 2) {//if boardHolder[i][y] is other colour
+					//move
+					if (y < 7) {
+						if (boardHolder[y + 1][x] == 0) {
+							std::memcpy(newBoard, boardHolder, 8 * 8 * sizeof int());
+							newBoard[y + 1][x] = boardHolder[y][x];
+							newBoard[y][x] = 0;
+							routeValue += nextSetOfMoves(newBoard, depth + 1);
+							branches++;
+							if (y == 1 && boardHolder[3][x] == 0) {
+								std::memcpy(newBoard, boardHolder, 8 * 8 * sizeof int());
+								newBoard[3][x] = 1;
+								newBoard[1][x] = 0;
+								routeValue += nextSetOfMoves(newBoard, depth + 1);
+								branches++;
+							}
+						}
+						//taking
+						if (x > 0 && boardHolder[y + 1][x - 1] % 2 == 0) {
+							std::memcpy(newBoard, boardHolder, 8 * 8 * sizeof int());
+							newBoard[y + 1][x - 1] = boardHolder[y][x];
+							newBoard[y][x] = 0;
+							routeValue += nextSetOfMoves(newBoard, depth + 1);
+							branches++;
+						}
+						if (x < 7 && boardHolder[y + 1][x + 1] % 2 == 0) {
 							std::memcpy(newBoard, boardHolder, 8 * 8 * sizeof int());
 							newBoard[y + 1][x + 1] = boardHolder[y][x];
 							newBoard[y][x] = 0;
 							routeValue += nextSetOfMoves(newBoard, depth + 1);
 							branches++;
 						}
-						//taking in -x
-						if (x > 0 && boardHolder[y][x] % 2 != boardHolder[y - 1][x + 1] % 2) {//if boardHolder[i][y] is other colour
-							std::memcpy(newBoard, boardHolder, 8 * 8 * sizeof int());
-							newBoard[y - 1][x + 1] = boardHolder[y][x];
-							newBoard[y][x] = 0;
-							routeValue += nextSetOfMoves(newBoard, depth + 1);
-							branches++;
-						}
 					}
-					//white peice taking
-					else if (y > 0 && boardHolder[y][x] == 2) {
-						//taking in +x -y
-						if (x < 7 && boardHolder[y][x] % 2 != boardHolder[y - 1][x + 1] % 2) {//if boardHolder[i][y] is other colour
+					//taking
+					break;
+				case 2://white pawn
+					//move
+					if (y > 0) {
+						if (boardHolder[y - 1][x] == 0) {
 							std::memcpy(newBoard, boardHolder, 8 * 8 * sizeof int());
-							newBoard[y - 1][x + 1] = boardHolder[y][x];
+							newBoard[y + 1][x] = boardHolder[y][x];
 							newBoard[y][x] = 0;
 							routeValue += nextSetOfMoves(newBoard, depth + 1);
 							branches++;
+							if (y == 6 && boardHolder[y - 2][x] == 0) {
+								std::memcpy(newBoard, boardHolder, 8 * 8 * sizeof int());
+								newBoard[4][x] = 1;
+								newBoard[6][x] = 0;
+								routeValue += nextSetOfMoves(newBoard, depth + 1);
+								branches++;
+							}
 						}
-						//taking in -x -y
-						if (x > 0 && boardHolder[y][x] % 2 != boardHolder[y - 1][x - 1] % 2) {//if boardHolder[i][y] is other colour
+						//taking
+						if (x > 0 && boardHolder[y - 1][x - 1] % 2 == 1) {
 							std::memcpy(newBoard, boardHolder, 8 * 8 * sizeof int());
 							newBoard[y - 1][x - 1] = boardHolder[y][x];
+							newBoard[y][x] = 0;
+							routeValue += nextSetOfMoves(newBoard, depth + 1);
+							branches++;
+						}
+						if (x < 7 && boardHolder[y - 1][x + 1] % 2 == 1) {
+							std::memcpy(newBoard, boardHolder, 8 * 8 * sizeof int());
+							newBoard[y - 1][x + 1] = boardHolder[y][x];
 							newBoard[y][x] = 0;
 							routeValue += nextSetOfMoves(newBoard, depth + 1);
 							branches++;
